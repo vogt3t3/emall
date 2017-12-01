@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emall.dao.UserDao" >
+  <resultMap id="BaseResultMap" type="com.emall.pojo.User" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="username" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="password" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="email" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="phone" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="question" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="answer" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="role" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, username, password, email, phone, question, answer, role, create_time, update_time
+  </sql>
+  <select id="getByUsername" resultMap="BaseResultMap" parameterType="java.util.Map">
+    SELECT * from mmall_user where username = #{username,jdbcType = VARCHAR}
+  </select>
+
+  <!--查找用户名是否存在-->
+  <select id="check_username" resultType="java.lang.Integer" parameterType="string">
+    SELECT count(1) from mmall_user WHERE username = #{username}
+  </select>
+  <!--登录，select*需要替换成上面自动生成的sql字段，避免别人修改表，导致自己查询到不必要数据-->
+  <select id="login" resultMap="BaseResultMap" parameterType="map">
+    SELECT <include refid="Base_Column_List"/>
+    from mmall_user WHERE username= #{username} and password =#{password}
+  </select>
+  <!--查找邮箱是否已存在-->
+  <select id="check_email" resultType="java.lang.Integer" parameterType="string">
+    SELECT count(1)from mmall_user WHERE email = #{email}
+  </select>
+  <select id="selectQuestionByUsername" resultType="java.lang.String" parameterType="string">
+    SELECT question from mmall_user where username = #{username};
+  </select>
+  <select id="checkAnswer" resultType="java.lang.Integer" parameterType="map">
+    SELECT count(1) FROM mmall_user
+    WHERE
+    username = #{username}
+    and
+    question = #{question}
+    and
+    answer = #{answer}
+  </select>
+
+  <insert id="registry" parameterType="com.emall.pojo.User"  >
+    insert into mmall_user (username, password,
+    email, phone, question,answer, role, create_time,
+    update_time)
+    values (#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR},
+    #{email,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{question,jdbcType=VARCHAR},
+    #{answer,jdbcType=VARCHAR}, #{role,jdbcType=INTEGER}, now(),
+    now())
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.emall.pojo.User" >
+    update mmall_user
+    <set >
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="question != null" >
+        question = #{question,jdbcType=VARCHAR},
+      </if>
+      <if test="answer != null" >
+        answer = #{answer,jdbcType=VARCHAR},
+      </if>
+      <if test="role != null" >
+        role = #{role,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = now(),
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <!--验证答案之后，对密码进行更新-->
+  <update id="updatePasswordByUsername" parameterType="map">
+    UPDATE mmall_user
+    SET password = #{md5Password},update_time = now()
+    where username = #{username}
+  </update>
+  <!--查找密码是否存在-->
+  <select id="checkPassword" parameterType="map" resultType="int" >
+    SELECT count(1)
+    from mmall_user
+    where id = #{id}
+    and password = #{password}
+  </select>
+  <!--通过userId查询邮箱-->
+  <select id="checkEmailByUserId" resultType="java.lang.Integer" parameterType="map">
+    select count(1)
+    from mmall_user
+    where email = #{email}
+    and id != #{id}
+  </select>
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from mmall_user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+</mapper>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emall.dao.ShippingDao" >
+    <resultMap id="BaseResultMap" type="com.emall.pojo.Shipping" >
+        <constructor >
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="receiver_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="receiver_phone" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="receiver_mobile" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="receiver_province" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="receiver_city" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="receiver_district" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="receiver_address" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="receiver_zip" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+            <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+        </constructor>
+    </resultMap>
+  <resultMap id="BaseResultMap1" type="ShippingVo">
+   <result column="receiver_name" property="receiverName"/>
+    <result column="receiver_phone" property="receiverPhone"/>
+    <result column="receiver_mobile" property="receiverMobile"/>
+    <result column="receiver_province" property="receiverProvince"/>
+    <result column="receiver_city" property="receiverCity"/>
+    <result column="receiver_district" property="receiverDistrict"/>
+    <result column="receiver_address" property="receiverAddress"/>
+    <result column="receiver_zip" property="receiverZip"/>
+  </resultMap>
+  <sql id="Base_Column_List1" >
+   receiver_name, receiver_phone, receiver_mobile, receiver_province, receiver_city,
+    receiver_district, receiver_address, receiver_zip
+  </sql>
+    <sql id="Base_Column_List" >
+        id, user_id, receiver_name, receiver_phone, receiver_mobile, receiver_province,
+        receiver_city, receiver_district, receiver_address, receiver_zip, create_time, update_time
+    </sql>
+  <select id="createShippingVo" parameterType="int" resultMap="BaseResultMap1">
+    select <include refid="Base_Column_List1"/>
+    from mmall_shipping where id=#{shippingId}
+  </select>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />
+        from mmall_shipping
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap" parameterType="integer">
+        select
+        <include refid="Base_Column_List" />
+        from mmall_shipping WHERE  user_id = #{userId}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+        delete from mmall_shipping
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="Shipping" >
+     insert into mmall_shipping(user_id,receiver_name,receiver_phone,receiver_mobile,receiver_province,receiver_city,receiver_district,receiver_address,receiver_zip,create_time,update_time)
+     values(#{userId},#{receiverName},#{receiverPhone},#{receiverMobile},#{receiverProvince},#{receiverCity},#{receiverDistrict},#{receiverAddress},#{receiverZip},now(),now())
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="Shipping" >
+        update mmall_shipping
+        set
+        receiver_name = #{receiverName,jdbcType=VARCHAR},
+        receiver_phone = #{receiverPhone,jdbcType=VARCHAR},
+        receiver_mobile = #{receiverMobile,jdbcType=VARCHAR},
+        receiver_provience = #{receiverProvience,jdbcType=VARCHAR},
+        receiver_city = #{receiverCity,jdbcType=VARCHAR},
+        receiver_district = #{receiverDistrict,jdbcType=VARCHAR},
+        receiver_address = #{receiverAddress,jdbcType=VARCHAR},
+        receiver_zip = #{receiverZip,jdbcType=VARCHAR},
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+        update_time = now()
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

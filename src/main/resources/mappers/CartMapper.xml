@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emall.dao.CartDao" >
+  <resultMap id="BaseResultMap" type="com.emall.pojo.Cart" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="product_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="quantity" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="checked" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+  <resultMap id="BaseResultMap1" type="OrderItemVo" >
+  <id column="orderNo" property="orderNo"/>
+    <result column="product_id" property="productId"/>
+    <result column="name" property="productName"/>
+    <result column="main_image" property="productImage"/>
+    <result column="price" property="currentUnitPrice"/>
+    <result column="quantity" property="quantity"/>
+    <result column="create_time" property="createTime"/>
+    <result column="totalPrice" property="totalPrice"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_id, product_id, quantity, checked, create_time, update_time
+  </sql>
+  <delete id="deleteCart" parameterType="int">
+    delete from mmall_cart where user_id=#{userId} and checked=1
+  </delete>
+  <select id="findCart" parameterType="int" resultMap="BaseResultMap1">
+    select unix_timestamp()*1000 orderNo,c.product_id,name,main_image,price,quantity,c.create_time,price*quantity totalPrice from mmall_cart c
+   inner join mmall_product p on c.product_id=p.id where user_id=#{userId} and checked=1
+  </select>
+  <insert id="addCart"  parameterType="map">
+    insert into mmall_cart (user_id, product_id,
+    quantity, create_time,
+    update_time)
+    values (#{userId,jdbcType=INTEGER}, #{productId,jdbcType=INTEGER},
+    #{count,jdbcType=INTEGER},now(),
+    now())
+  </insert>
+
+  <select id="selectCartAll" parameterType="integer" resultType="CartProductVoList">
+    SELECT c.id id,user_id userId,product_id productId,quantity,name productName,subtitle productSubtitle,
+    main_image productMainImage,price productPrice,status productStatus,price*quantity productTotalPrice,
+    stock productStock,checked productChecked from  mmall_cart c
+    INNER JOIN mmall_product
+    on mmall_product.id=product_id and user_id=#{userId}
+  </select>
+  <update id="updateCount" parameterType="map">
+    UPDATE mmall_cart set quantity=#{count},update_time=now() where user_id = #{userId} and product_id=#{productId}
+  </update>
+  <delete id="delCart" parameterType="map" >
+    DELETE FROM mmall_cart WHERE  user_id=#{userId} and product_id in
+    <foreach collection="productIds" index="index" item="productId" open="(" separator="," close=")">
+      #{productId}
+    </foreach>
+  </delete>
+  <update id="checkCart" parameterType="map">
+    UPDATE mmall_cart SET  checked = 1
+    WHERE  user_id=#{userId} and product_id=#{productId}
+  </update>
+  <update id="uncheckCart" parameterType="map">
+    UPDATE mmall_cart SET  checked = 0
+    WHERE   product_id=#{productId} and user_id=#{userId}
+  </update>
+  <select id="getCount" parameterType="integer" resultType="integer">
+    SELECT count(*) from mmall_cart where user_id=#{userId}
+  </select>
+  <update id="checkAll" parameterType="integer">
+    UPDATE mmall_cart set checked=1 where user_id=#{userId}
+  </update>
+  <update id="uncheckAll" parameterType="integer">
+    UPDATE mmall_cart set checked=0 where user_id=#{userId}
+  </update>
+</mapper>

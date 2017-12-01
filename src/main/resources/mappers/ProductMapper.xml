@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emall.dao.ProductDao" >
+  <resultMap id="BaseResultMap" type="com.emall.pojo.Product" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="category_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="subtitle" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="main_image" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="sub_images" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="detail" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="price" jdbcType="DECIMAL" javaType="java.math.BigDecimal" />
+      <arg column="stock" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="status" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, category_id, name, subtitle, main_image, sub_images, detail, price, stock, status,
+    create_time, update_time
+  </sql>
+  <update id="addStock" parameterType="map">
+  update mmall_product set stock=stock+#{count} where id=#{productId}
+  </update>
+  <update id="reduceStock" parameterType="map">
+    update mmall_product set stock=stock-#{count} where id=#{productId}
+  </update>
+  <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from mmall_product
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="showById" resultType="com.emall.vo.ProductDetailVo">
+    select p.id,p.category_id categoryId,c.parent_id parentCategoryId,p.name,p.subtitle,p.main_image mainImage,p.sub_images subImages,p.detail,p.price,p.stock,p.status,p.create_time createTime,p.update_time updateTime
+    FROM mmall_product p INNER JOIN mmall_category c ON p.category_id = c.id WHERE p.id = #{id}
+  </select>
+
+  <select id="findByIdOrName" resultType="com.emall.vo.ProductSerarchVo">
+    SELECT id,category_id categoryId,name,subtitle,main_image mainImage,price FROM mmall_product
+    WHERE
+    <if test="id != null">
+      id = #{id}
+    </if>
+    <if test="name != null">
+      name like "%${name}%"
+    </if>
+  </select>
+
+  <select id="findAll" resultType="com.emall.vo.ProductListVo">
+    SELECT id,category_id categoryId,name,subtitle,main_image mainImage,status,price FROM mmall_product
+  </select>
+  <select id="findListByKeyword" resultType="com.emall.vo.ProductListVo">
+      SELECT p.id,p.category_id categoryId,p.name,p.subtitle,p.main_image mainImage,p.status,p.price from mmall_product p
+      inner join mmall_category c on p.category_id = c.id
+      <where>
+        <if test="categoryId!=null">
+       and p.category_id=#{categoryId}
+        </if>
+        <if test="name!=null">
+        and  p.name like "%${name}%"
+          or c.name = #{name}
+        </if>
+
+      </where>
+  </select>
+
+  <update id="updateProductStatus" parameterType="java.util.Map">
+    UPDATE mmall_product
+    set status = #{status}
+    where id = #{id}
+  </update>
+
+  <update id="saveOrUpdateProduct">
+    <if test="id != null">
+      UPDATE mmall_product
+      set category_id = #{categoryId},
+      name = #{name},
+      subtitle = #{subtitle},
+      main_image = #{mainImage},
+      sub_images = #{subImages},
+      detail = #{detail},
+      price = #{price},
+      stock = #{stock},
+      status = #{status},
+      update_time = now()
+      where id = #{id}
+    </if>
+    <if test="id == null">
+      insert into mmall_product (category_id,name,
+      subtitle,main_image, sub_images,
+      detail, price,stock,status,
+      create_time, update_time)
+      values (#{categoryId},#{name},#{subtitle},#{mainImage},#{subImages},#{detail},#{price},#{stock},#{status},
+      now(),now())
+    </if>
+  </update>
+  <update id="uploadImage">
+    UPDATE mmall_product
+    set main_Image = #{uri}
+    where id = #{productId}
+  </update>
+  <update id="fullUploadImage">
+    UPDATE mmall_product
+    set sub_images = #{uri}
+    where id = #{productId}
+  </update>
+</mapper>
